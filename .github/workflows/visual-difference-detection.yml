@@ -1,0 +1,71 @@
+name: Visual difference detection
+# Detects visual differences between the main branch and pull requests. To activate you have to add the "visual-comparison-required" label to the pull request.
+
+on:
+  pull_request:
+    types: [ labeled ]
+
+jobs:
+  check-label:
+    # Checks if the "visual-comparison-required" label is present on the pull request. The remaining jobs will only run if the label is present.
+    name: Check for "visual-comparison-required" label
+    runs-on: ubuntu-latest
+    outputs:
+      visual-comparison-required-label-found: ${{ steps.check.outputs.visual-comparison-required-label-found }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check for "visual-comparison-required" label
+        id: check
+        env:
+          VISUAL_COMPARISON_REQUIRED_LABEL_PRESENT: ${{ contains(github.event.pull_request.labels.*.name, 'visual-comparison-required') }}
+        run: |
+          echo "visual-comparison-required-label-found=$VISUAL_COMPARISON_REQUIRED_LABEL_PRESENT" | tee "$GITHUB_OUTPUT"
+
+  take-screenshots-main:
+    name: Take screenshots of the main branch
+    needs: check-label
+    if: needs.check-label.outputs.visual-comparison-required-label-found == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: current
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: yarn playwright install --with-deps chromium
+      - name: Build the website
+        run: yarn docusaurus build
+      - name: Take screenshots with Playwright
+        run: yarn workspace argos screenshot
+      - name: Upload screenshots to Argos
+        run: yarn workspace argos upload
+
+  take-screenshots-pull-request:
+    name: Take screenshots of the pull request
+    needs: check-label
+    if: needs.check-label.outputs.visual-comparison-required-label-found == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: current
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: yarn playwright install --with-deps chromium
+      - name: Build the website
+        run: yarn docusaurus build
+      - name: Take screenshots with Playwright
+        run: yarn workspace argos screenshot
+      - name: Upload screenshots to Argos
+        run: yarn workspace argos upload
