@@ -58,7 +58,8 @@ svg {
 }
 
 a {
-  color: rgb(116, 164, 188);
+  color: purple;
+  /*color: rgb(116, 164, 188);*/
 }
 
 .boxed {
