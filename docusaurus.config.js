@@ -62,7 +62,7 @@ const config = {
           blogDescription: 'Data lineage is the foundation for a new generation of powerful, context-aware data tools and best practices. OpenLineage enables consistent collection of lineage metadata, creating a deeper understanding of how data is produced and used.',
           showReadingTime: true,
           blogSidebarCount: 5,
-          blogSidebarTitle: 'Recent posts',
+          blogSidebarTitle: 'Recent postss',
           feedOptions: {
             type: ['json'],
             copyright: `Copyright © ${new Date().getFullYear()} The Linux Foundation®. All rights reserved.`,
